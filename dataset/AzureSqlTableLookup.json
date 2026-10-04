@@ -1,0 +1,12 @@
+{
+	"name": "AzureSqlTableLookup",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureSQLcaresync",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
