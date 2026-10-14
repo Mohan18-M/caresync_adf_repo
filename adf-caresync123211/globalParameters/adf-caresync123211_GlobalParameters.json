@@ -1,1 +1,6 @@
-{}
+{
+	"email_recipient": {
+		"type": "string",
+		"value": "mohanmalapur6@gmail.com"
+	}
+}

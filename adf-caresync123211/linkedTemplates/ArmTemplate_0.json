@@ -579,7 +579,10 @@
 									"type": "Expression"
 								},
 								"status": "SUCCESS",
-								"email_recipient": "mohanmalapur6@gmail.com"
+								"email_recipient": {
+									"value": "@pipeline().globalParameters.email_recipient",
+									"type": "Expression"
+								}
 							}
 						}
 					},
@@ -610,7 +613,10 @@
 									"type": "Expression"
 								},
 								"status": "FAILED",
-								"email_recipient": "mohanmalapur6@gmail.com"
+								"email_recipient": {
+									"value": "@pipeline().globalParameters.email_recipient",
+									"type": "Expression"
+								}
 							}
 						}
 					}
