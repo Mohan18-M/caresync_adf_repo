@@ -1,0 +1,23 @@
+{
+	"name": "DS_ADLS_CSV_ADF_Course",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADF_Course_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "output",
+				"fileSystem": "adf-course-container"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
