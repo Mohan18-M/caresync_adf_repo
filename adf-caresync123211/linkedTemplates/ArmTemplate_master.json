@@ -7,9 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-caresync123211"
 		},
+		"LS_ADF_Course_ADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_ADF_Course_ADLS'"
+		},
 		"LS_AzureSQL_ADF_Course_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_AzureSQL_ADF_Course'"
+		},
+		"LS_ADF_Course_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adfcourse12321.dfs.core.windows.net/"
 		},
 		"LS_ADLS_properties_typeProperties_url": {
 			"type": "string",
@@ -86,8 +94,14 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_ADF_Course_ADLS_accountKey": {
+						"value": "[parameters('LS_ADF_Course_ADLS_accountKey')]"
+					},
 					"LS_AzureSQL_ADF_Course_password": {
 						"value": "[parameters('LS_AzureSQL_ADF_Course_password')]"
+					},
+					"LS_ADF_Course_ADLS_properties_typeProperties_url": {
+						"value": "[parameters('LS_ADF_Course_ADLS_properties_typeProperties_url')]"
 					},
 					"LS_ADLS_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_properties_typeProperties_url')]"

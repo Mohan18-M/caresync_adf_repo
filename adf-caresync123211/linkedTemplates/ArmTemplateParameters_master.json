@@ -5,8 +5,14 @@
 		"factoryName": {
 			"value": "adf-caresync123211"
 		},
+		"LS_ADF_Course_ADLS_accountKey": {
+			"value": ""
+		},
 		"LS_AzureSQL_ADF_Course_password": {
 			"value": ""
+		},
+		"LS_ADF_Course_ADLS_properties_typeProperties_url": {
+			"value": "https://adfcourse12321.dfs.core.windows.net/"
 		},
 		"LS_ADLS_properties_typeProperties_url": {
 			"value": "https://caresyncproject2.dfs.core.windows.net/"
