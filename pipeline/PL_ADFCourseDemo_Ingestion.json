@@ -66,6 +66,68 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Execute send email pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ADF_Course_CopyData_SQL_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EMAIL_DEMO",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"table_name": {
+							"value": "@pipeline().parameters.table_name",
+							"type": "Expression"
+						},
+						"status": "SUCCESS",
+						"email_recipient": "mohanmalapur6@gmail.com"
+					}
+				}
+			},
+			{
+				"name": "Execute send email pipeline_for_failure",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ADF_Course_CopyData_SQL_ADLS",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EMAIL_DEMO",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"table_name": {
+							"value": "@pipeline().parameters.table_name",
+							"type": "Expression"
+						},
+						"status": "FAILED",
+						"email_recipient": "mohanmalapur6@gmail.com"
+					}
+				}
 			}
 		],
 		"parameters": {
