@@ -79,87 +79,11 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "ADF_Course_CopyData_SQL_ADLS",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "Read_watermark",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select * from @{pipeline().parameters.table_name} where modifieddate > '@{activity('Read_watermark').output.firstRow.watermark_value}'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_AzureSQL_ADFCourse",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema": "dbo",
-									"tablename": {
-										"value": "@pipeline().parameters.table_name",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ADLS_CSV_ADF_Course",
-								"type": "DatasetReference",
-								"parameters": {
-									"table_name": {
-										"value": "@pipeline().parameters.table_name",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
 						"name": "Execute send email pipeline",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "ADF_Course_CopyData_SQL_ADLS",
+								"activity": "Check Source Count",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -193,7 +117,7 @@
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "ADF_Course_CopyData_SQL_ADLS",
+								"activity": "Check Source Count",
 								"dependencyConditions": [
 									"Failed"
 								]
@@ -255,11 +179,132 @@
 						}
 					},
 					{
-						"name": "Update Watermark",
-						"type": "Script",
+						"name": "Check Source Count",
+						"type": "IfCondition",
 						"dependsOn": [
 							{
-								"activity": "ADF_Course_CopyData_SQL_ADLS",
+								"activity": "Check count in Source",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Check count in Source').output.firstRow.count,0)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Update Watermark",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "LS_AzureSQL_ADF_Course",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='@{pipeline().parameters.table_name}'",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "ADF_Course_CopyData_SQL_ADLS",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "select * from @{pipeline().parameters.table_name} where modifieddate > '@{activity('Read_watermark').output.firstRow.watermark_value}'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_AzureSQL_ADFCourse",
+											"type": "DatasetReference",
+											"parameters": {
+												"schema": "dbo",
+												"tablename": {
+													"value": "@pipeline().parameters.table_name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ADLS_CSV_ADF_Course",
+											"type": "DatasetReference",
+											"parameters": {
+												"table_name": {
+													"value": "@pipeline().parameters.table_name",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Check count in Source",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Read_watermark",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -273,21 +318,24 @@
 							"secureInput": false
 						},
 						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "LS_AzureSQL_ADF_Course",
-							"type": "LinkedServiceReference"
-						},
 						"typeProperties": {
-							"scripts": [
-								{
-									"type": "Query",
-									"text": {
-										"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='@{pipeline().parameters.table_name}'",
-										"type": "Expression"
-									}
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select count(*) as count from dbo.@{pipeline().parameters.table_name} where modifieddate>'@{activity('Read_watermark').output.firstRow.watermark_value}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_AzureSQL_ADFCourse",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema": "dummy",
+									"tablename": "dummy"
 								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					}
 				],
@@ -303,10 +351,10 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_ADFCourse')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_ADF_Course')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_EMAIL_DEMO')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_ADF_Course')]"
+				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_ADFCourse')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_ADF_Course')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_ADF_Course')]"
 			]
 		},
 		{
