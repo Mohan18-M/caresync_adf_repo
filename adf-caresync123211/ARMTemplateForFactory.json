@@ -81,7 +81,14 @@
 					{
 						"name": "ADF_Course_CopyData_SQL_ADLS",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Read_watermark",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -93,6 +100,10 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select * from dbo.customers where modifieddate > '@{activity('Read_watermark').output.firstRow.watermark_value}'",
+									"type": "Expression"
+								},
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
@@ -210,6 +221,74 @@
 								}
 							}
 						}
+					},
+					{
+						"name": "Read_watermark",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select watermark_value from metadata.table_watermarks where table_name='@{toLower(pipeline().parameters.table_name)}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_AzureSQL_ADFCourse",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema": "dbo",
+									"tablename": "customers"
+								}
+							}
+						}
+					},
+					{
+						"name": "Update Watermark",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "ADF_Course_CopyData_SQL_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_AzureSQL_ADF_Course",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='pipeline().parameters.table_name'",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
 					}
 				],
 				"policy": {
@@ -226,7 +305,8 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_ADFCourse')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_ADF_Course')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_EMAIL_DEMO')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_EMAIL_DEMO')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_ADF_Course')]"
 			]
 		},
 		{
@@ -1002,6 +1082,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().table_name,'_',utcNow())",
+							"type": "Expression"
+						},
 						"folderPath": {
 							"value": "@dataset().table_name",
 							"type": "Expression"
