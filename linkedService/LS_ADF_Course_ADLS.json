@@ -1,0 +1,12 @@
+{
+	"name": "LS_ADF_Course_ADLS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://adfcourse12321.dfs.core.windows.net/",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEJCODZENDBDLTg5ODgtNERBNS1BRTA5LTJEOTdCMUVERDIwQV8wM2MwNTIzOS0zYThmLTQzN2UtYjAwMS1iZGM2MWJjZTA3YzUiDQp9"
+		}
+	}
+}
