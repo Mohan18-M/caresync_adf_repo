@@ -23,7 +23,11 @@
 					},
 					"dataset": {
 						"referenceName": "DS_AzureSQL_ADFCourse",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dummyu",
+							"tablename": "dummy"
+						}
 					},
 					"firstRowOnly": true
 				}
