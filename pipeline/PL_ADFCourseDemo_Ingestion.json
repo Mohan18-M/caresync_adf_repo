@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select * from dbo.customers where modifieddate > '@{activity('Read_watermark').output.firstRow.watermark_value}'",
+							"value": "select * from @{pipeline().parameters.table_name} where modifieddate > '@{activity('Read_watermark').output.firstRow.watermark_value}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -206,7 +206,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='pipeline().parameters.table_name'",
+								"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='@{pipeline().parameters.table_name}'",
 								"type": "Expression"
 							}
 						}

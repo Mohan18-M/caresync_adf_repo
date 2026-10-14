@@ -16,11 +16,11 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat(dataset().table_name,'_',utcNow())",
+					"value": "@concat(toLower(dataset().table_name),'_',utcNow())",
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@dataset().table_name",
+					"value": "@toLower(dataset().table_name)",
 					"type": "Expression"
 				},
 				"fileSystem": "adf-course-container"
