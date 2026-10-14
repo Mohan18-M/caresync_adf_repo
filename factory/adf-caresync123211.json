@@ -1,0 +1,12 @@
+{
+	"name": "adf-caresync123211",
+	"properties": {
+		"globalParameters": {
+			"email_recipient": {
+				"type": "string",
+				"value": "mohanmalapur6@gmail.com"
+			}
+		}
+	},
+	"location": "centralindia"
+}
