@@ -5,6 +5,14 @@
 			"referenceName": "LS_AzureSQL_ADF_Course",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"schema": {
+				"type": "string"
+			},
+			"tablename": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
@@ -32,8 +40,14 @@
 			}
 		],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": "Customers"
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().tablename",
+				"type": "Expression"
+			}
 		}
 	}
 }
