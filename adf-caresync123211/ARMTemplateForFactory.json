@@ -121,26 +121,106 @@
 							{
 								"referenceName": "DS_AzureSQL_ADFCourse",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"schema": "dbo",
+									"tablename": {
+										"value": "@pipeline().parameters.table_name",
+										"type": "Expression"
+									}
+								}
 							}
 						],
 						"outputs": [
 							{
 								"referenceName": "DS_ADLS_CSV_ADF_Course",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"table_name": {
+										"value": "@pipeline().parameters.table_name",
+										"type": "Expression"
+									}
+								}
 							}
 						]
+					},
+					{
+						"name": "Execute send email pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ADF_Course_CopyData_SQL_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EMAIL_DEMO",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"table_name": {
+									"value": "@pipeline().parameters.table_name",
+									"type": "Expression"
+								},
+								"status": "SUCCESS",
+								"email_recipient": "mohanmalapur6@gmail.com"
+							}
+						}
+					},
+					{
+						"name": "Execute send email pipeline_for_failure",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ADF_Course_CopyData_SQL_ADLS",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_EMAIL_DEMO",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"table_name": {
+									"value": "@pipeline().parameters.table_name",
+									"type": "Expression"
+								},
+								"status": "FAILED",
+								"email_recipient": "mohanmalapur6@gmail.com"
+							}
+						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"parameters": {
+					"table_name": {
+						"type": "string",
+						"defaultValue": "customers"
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_ADFCourse')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_ADF_Course')]"
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_ADF_Course')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_EMAIL_DEMO')]"
 			]
 		},
 		{
@@ -171,7 +251,10 @@
 							"dataset": {
 								"referenceName": "DS_AzureSQL_ADFCourse",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"schema": "dummyu",
+									"tablename": "dummy"
+								}
 							},
 							"firstRowOnly": true
 						}
@@ -185,6 +268,137 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_ADFCourse')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EMAIL_DEMO')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Send_Email",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Prepare Email Body",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"url": "https://prod-14.northcentralus.logic.azure.com:443/workflows/4f3d42df8d504d5c8234a5b39df1aac5/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=VfBfJ92pFpDSzb2lgT844yvdYC9JhaHFN3FvQbPW59E",
+							"body": {
+								"value": "@variables('logicapps_body')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Prepare Email Body",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Prepare email subject",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Prepare_Email_Body",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "logicapps_body",
+							"value": {
+								"value": "{\"email_recipient\":\"@{pipeline().parameters.email_recipient}\",\n\"subject\":\"@{variables('email_subject')}\",\n\"body\":\"@{variables('email_body')}\"\n}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Prepare email subject",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "email_subject",
+							"value": {
+								"value": "@{pipeline().parameters.table_name} - @{pipeline().parameters.status}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Prepare_Email_Body",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "email_body",
+							"value": {
+								"value": "The table @{pipeline().parameters.table_name} ingestion has been completed. and the status is @{pipeline().parameters.status}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"email_recipient": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"logicapps_body": {
+						"type": "String"
+					},
+					"email_subject": {
+						"type": "String"
+					},
+					"email_body": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_SOURCE_TO_SILVER_INNER')]",
@@ -772,12 +986,20 @@
 					"referenceName": "LS_ADF_Course_ADLS",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "output",
+						"folderPath": {
+							"value": "@dataset().table_name",
+							"type": "Expression"
+						},
 						"fileSystem": "adf-course-container"
 					},
 					"columnDelimiter": ",",
@@ -799,6 +1021,14 @@
 				"linkedServiceName": {
 					"referenceName": "LS_AzureSQL_ADF_Course",
 					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"tablename": {
+						"type": "string"
+					}
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
@@ -827,8 +1057,14 @@
 					}
 				],
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "Customers"
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tablename",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": [
