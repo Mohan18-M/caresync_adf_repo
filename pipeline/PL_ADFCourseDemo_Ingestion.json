@@ -119,37 +119,6 @@
 						"value": "@greater(activity('Check count in Source').output.firstRow.count,0)",
 						"type": "Expression"
 					},
-					"ifFalseActivities": [
-						{
-							"name": "Update Watermark",
-							"type": "Script",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"linkedServiceName": {
-								"referenceName": "LS_AzureSQL_ADF_Course",
-								"type": "LinkedServiceReference"
-							},
-							"typeProperties": {
-								"scripts": [
-									{
-										"type": "Query",
-										"text": {
-											"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='@{pipeline().parameters.table_name}'",
-											"type": "Expression"
-										}
-									}
-								],
-								"scriptBlockExecutionTimeout": "02:00:00"
-							}
-						}
-					],
 					"ifTrueActivities": [
 						{
 							"name": "ADF_Course_CopyData_SQL_ADLS",
@@ -219,6 +188,42 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Update Watermark",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "ADF_Course_CopyData_SQL_ADLS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LS_AzureSQL_ADF_Course",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "update metadata.table_watermarks\nSET watermark_value=SYSUTCDATETIME()\nwhere table_name='@{pipeline().parameters.table_name}'",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					]
 				}
