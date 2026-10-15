@@ -42,6 +42,43 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "Store Table Successs",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Execute Ingestion Pipeline",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "table_status",
+								"value": "@item().table_name - Success"
+							}
+						},
+						{
+							"name": "Store Table failure",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Execute Ingestion Pipeline",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "table_status",
+								"value": {
+									"value": "@item().table_name - Failure",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -75,8 +112,46 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "Send consolidated Email",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Ingest All tables",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_EMAIL_DEMO_MULTIPLE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"email_recipient": {
+							"value": "@pipeline().globalParameters.email_recipient",
+							"type": "Expression"
+						},
+						"table_status": {
+							"value": "@variables('table_status')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
+		"variables": {
+			"table_status": {
+				"type": "Array"
+			}
+		},
 		"annotations": []
 	}
 }
