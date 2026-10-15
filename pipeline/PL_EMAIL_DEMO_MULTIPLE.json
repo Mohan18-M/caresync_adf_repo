@@ -92,7 +92,7 @@
 				"typeProperties": {
 					"variableName": "email_body",
 					"value": {
-						"value": "The ingestion process has been completed for all tables and below is the status:\n@{pipeline().parameters.table_status}\n\nPipeline Run ID = @{pipeline().RunId}",
+						"value": "The ingestion process has been completed for all tables and below is the status:\n@{replace(string(pipeline().parameters.table_status),'\"','')}\n\nPipeline Run ID = @{pipeline().RunId}",
 						"type": "Expression"
 					}
 				}
