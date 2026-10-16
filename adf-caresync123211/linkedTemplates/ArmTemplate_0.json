@@ -721,6 +721,8 @@
 					{
 						"name": "Execute send email pipeline",
 						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Check Source Count",
@@ -755,6 +757,8 @@
 					{
 						"name": "Execute send email pipeline_for_failure",
 						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Check Source Count",
