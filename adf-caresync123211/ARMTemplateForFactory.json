@@ -70,10 +70,6 @@
 		"TGR_EVENT_SIMPLE_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/74a4a6a7-9f17-4cf3-af3e-f5b51ae151f1/resourceGroups/rg_caresync/providers/Microsoft.Storage/storageAccounts/caresyncproject2"
-		},
-		"TGR_STORAGE_EVENT_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/74a4a6a7-9f17-4cf3-af3e-f5b51ae151f1/resourceGroups/rg_caresync/providers/Microsoft.Storage/storageAccounts/caresyncproject2"
 		}
 	},
 	"variables": {
@@ -2063,44 +2059,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/TGR_Ingestion_Schedule')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_FOREACH_DEMO",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2026-10-16T07:54:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								14
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_FOREACH_DEMO')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/PL_FILE_EVENT')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2176,7 +2134,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -2192,37 +2150,6 @@
 					"blobPathEndsWith": ".txt",
 					"ignoreEmptyBlobs": true,
 					"scope": "[parameters('TGR_EVENT_SIMPLE_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_FILE_EVENT')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TGR_STORAGE_EVENT')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_FILE_EVENT",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/source/blobs/source_folder",
-					"blobPathEndsWith": ".txt",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('TGR_STORAGE_EVENT_properties_typeProperties_scope')]",
 					"events": [
 						"Microsoft.Storage.BlobCreated"
 					]

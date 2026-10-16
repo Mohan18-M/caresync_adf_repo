@@ -53,9 +53,6 @@
 		"TGR_EVENT_SIMPLE_properties_typeProperties_scope": {
 			"value": "/subscriptions/74a4a6a7-9f17-4cf3-af3e-f5b51ae151f1/resourceGroups/rg_caresync/providers/Microsoft.Storage/storageAccounts/caresyncproject2"
 		},
-		"TGR_STORAGE_EVENT_properties_typeProperties_scope": {
-			"value": "/subscriptions/74a4a6a7-9f17-4cf3-af3e-f5b51ae151f1/resourceGroups/rg_caresync/providers/Microsoft.Storage/storageAccounts/caresyncproject2"
-		},
 		"containerUri": {
 			"value": ""
 		},
