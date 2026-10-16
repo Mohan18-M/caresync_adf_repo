@@ -1,0 +1,25 @@
+{
+	"name": "TGR_EVENT_SIMPLE",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_FILE_EVENT",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/source/blobs/source_folder",
+			"blobPathEndsWith": ".txt",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/74a4a6a7-9f17-4cf3-af3e-f5b51ae151f1/resourceGroups/rg_caresync/providers/Microsoft.Storage/storageAccounts/caresyncproject2",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
